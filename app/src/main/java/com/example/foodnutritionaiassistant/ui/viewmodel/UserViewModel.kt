@@ -16,6 +16,18 @@ enum class LoginType {
     WECHAT, PHONE
 }
 
+enum class GroupCategory(val displayName: String) {
+    HEALTH("养生"),
+    FITNESS("健身"),
+    TODDLER("幼儿");
+
+    companion object {
+        fun fromName(name: String): GroupCategory {
+            return entries.find { it.name == name } ?: FITNESS
+        }
+    }
+}
+
 data class UserProfile(
     var nickname: String = "",
     var gender: Int = 0, // 0: Unknown, 1: Male, 2: Female
@@ -24,7 +36,8 @@ data class UserProfile(
     var weight: Float = 60f,
     var loginType: LoginType = LoginType.PHONE,
     var phoneNumber: String = "",
-    var wechatOpenId: String = ""
+    var wechatOpenId: String = "",
+    var groupCategory: GroupCategory = GroupCategory.FITNESS
 )
 
 class UserViewModel : ViewModel() {
@@ -148,6 +161,22 @@ class UserViewModel : ViewModel() {
 
     fun updateWeight(weight: Float) {
         userProfile = userProfile.copy(weight = weight)
+    }
+
+    fun updateGroupCategory(category: GroupCategory) {
+        userProfile = userProfile.copy(groupCategory = category)
+    }
+
+    fun updateUserGroupInDb(category: GroupCategory) {
+        userProfile = userProfile.copy(groupCategory = category)
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = userRepository.updateUserGroup(userProfile)
+            if (success) {
+                println("User group updated successfully in DB")
+            } else {
+                println("Failed to update user group in DB")
+            }
+        }
     }
 
     fun submitProfile() {

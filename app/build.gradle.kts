@@ -30,19 +30,26 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
+    }
+    packaging {
+        resources {
+            excludes += "META-INF/native-image/org.mongodb/bson/native-image.properties"
+        }
     }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -52,6 +59,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.mysql.connector.j)
+    implementation(libs.mongodb.driver.kotlin.coroutine)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     testImplementation(libs.junit)

@@ -2,6 +2,7 @@ package com.example.foodnutritionaiassistant.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,13 @@ import com.example.foodnutritionaiassistant.ui.viewmodel.UserViewModel
 import java.time.LocalDate
 import java.time.Period
 
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.foodnutritionaiassistant.ui.viewmodel.GroupCategory
+
 @Composable
 fun ProfileScreen(
     viewModel: UserViewModel,
@@ -37,6 +45,7 @@ fun ProfileScreen(
 fun ProfileContent(viewModel: UserViewModel) {
     val userProfile = viewModel.userProfile
     val age = Period.between(userProfile.birthDate, LocalDate.now()).years
+    var showGroupSelectionDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -84,11 +93,13 @@ fun ProfileContent(viewModel: UserViewModel) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Group Field (New Requirement)
+        // Group Field (Editable)
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-            modifier = Modifier.fillMaxWidth()
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showGroupSelectionDialog = true }
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -96,18 +107,65 @@ fun ProfileContent(viewModel: UserViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("所属群体", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Surface(
-                    color = Color(0xFFA5D6A7),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = "健身",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        color = Color.White,
-                        fontSize = 14.sp
-                    )
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = when(userProfile.groupCategory) {
+                            GroupCategory.HEALTH -> Color(0xFFA5D6A7)
+                            GroupCategory.FITNESS -> Color(0xFF90CAF9)
+                            GroupCategory.TODDLER -> Color(0xFFFFF59D)
+                        },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = userProfile.groupCategory.displayName,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            color = if (userProfile.groupCategory == GroupCategory.TODDLER) Color.Black else Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp)) // Added right padding
                 }
             }
+        }
+        
+        if (showGroupSelectionDialog) {
+            AlertDialog(
+                onDismissRequest = { showGroupSelectionDialog = false },
+                title = { Text("修改所属群体") },
+                text = {
+                    Column {
+                        GroupCategory.entries.forEach { category ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.updateUserGroupInDb(category)
+                                        showGroupSelectionDialog = false
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = userProfile.groupCategory == category,
+                                    onClick = null
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(category.displayName)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showGroupSelectionDialog = false }) {
+                        Text("取消")
+                    }
+                }
+            )
         }
         
         Spacer(modifier = Modifier.height(24.dp))

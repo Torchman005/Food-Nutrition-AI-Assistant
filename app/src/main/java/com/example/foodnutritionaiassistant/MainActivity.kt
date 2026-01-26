@@ -46,6 +46,7 @@ enum class RegistrationStep {
     LOGIN,
     NICKNAME,
     GENDER_AGE,
+    GROUP_SELECTION,
     HEIGHT_WEIGHT,
     COMPLETED
 }
@@ -100,8 +101,15 @@ fun FoodNutritionApp() {
             RegistrationStep.GENDER_AGE -> {
                 GenderAgeScreen(
                     viewModel = userViewModel,
-                    onNext = { registrationStep = RegistrationStep.HEIGHT_WEIGHT },
+                    onNext = { registrationStep = RegistrationStep.GROUP_SELECTION },
                     onBack = { registrationStep = RegistrationStep.NICKNAME }
+                )
+            }
+            RegistrationStep.GROUP_SELECTION -> {
+                GroupSelectionScreen(
+                    viewModel = userViewModel,
+                    onNext = { registrationStep = RegistrationStep.HEIGHT_WEIGHT },
+                    onBack = { registrationStep = RegistrationStep.GENDER_AGE }
                 )
             }
             RegistrationStep.HEIGHT_WEIGHT -> {
@@ -111,7 +119,7 @@ fun FoodNutritionApp() {
                         registrationStep = RegistrationStep.COMPLETED
                         currentDestination = AppDestinations.HOME
                     },
-                    onBack = { registrationStep = RegistrationStep.GENDER_AGE }
+                    onBack = { registrationStep = RegistrationStep.GROUP_SELECTION }
                 )
             }
             RegistrationStep.COMPLETED -> {

@@ -1,6 +1,7 @@
 package com.example.foodnutritionaiassistant.data.repository
 
 import com.example.foodnutritionaiassistant.data.db.DatabaseHelper
+import com.example.foodnutritionaiassistant.ui.viewmodel.GroupCategory
 import com.example.foodnutritionaiassistant.ui.viewmodel.LoginType
 import com.example.foodnutritionaiassistant.ui.viewmodel.UserProfile
 import java.sql.Date
@@ -53,7 +54,8 @@ class UserRepository {
                             weight = rs.getFloat("weight"),
                             loginType = loginType,
                             phoneNumber = if (loginType == LoginType.PHONE) identifier else "",
-                            wechatOpenId = if (loginType == LoginType.WECHAT) identifier else ""
+                            wechatOpenId = if (loginType == LoginType.WECHAT) identifier else "",
+                            groupCategory = GroupCategory.fromName(rs.getString("group_category") ?: "FITNESS")
                         )
                     }
                 }
@@ -68,8 +70,8 @@ class UserRepository {
         val query = """
             INSERT INTO app_user (
                 user_uid, nickname, login_type, phone_number, wechat_open_id, 
-                gender, birth_date, height, weight
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                gender, birth_date, height, weight, group_category
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
         return try {
@@ -84,7 +86,29 @@ class UserRepository {
                     stmt.setDate(7, java.sql.Date.valueOf(userProfile.birthDate.toString()))
                     stmt.setFloat(8, userProfile.height)
                     stmt.setFloat(9, userProfile.weight)
+                    stmt.setString(10, userProfile.groupCategory.name)
                     
+                    stmt.executeUpdate() > 0
+                }
+            } ?: false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun updateUserGroup(userProfile: UserProfile): Boolean {
+        val query = if (userProfile.loginType == LoginType.PHONE) {
+            "UPDATE app_user SET group_category = ? WHERE phone_number = ? AND login_type = 2"
+        } else {
+            "UPDATE app_user SET group_category = ? WHERE wechat_open_id = ? AND login_type = 1"
+        }
+
+        return try {
+            DatabaseHelper.getConnection()?.use { conn ->
+                conn.prepareStatement(query).use { stmt ->
+                    stmt.setString(1, userProfile.groupCategory.name)
+                    stmt.setString(2, if (userProfile.loginType == LoginType.PHONE) userProfile.phoneNumber else userProfile.wechatOpenId)
                     stmt.executeUpdate() > 0
                 }
             } ?: false
