@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.foodnutritionaiassistant"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -43,6 +43,13 @@ android {
     packaging {
         resources {
             excludes += "META-INF/native-image/org.mongodb/bson/native-image.properties"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/native-image/native-image.properties"
+            excludes += "META-INF/native-image/reflect-config.json"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "META-INF/INDEX.LIST"
         }
     }
 }
@@ -50,6 +57,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.dnsjava)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -58,10 +66,19 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.minio)
+    implementation(libs.coil.compose)
+    implementation(libs.apache.directory.api) {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    }
+    implementation(libs.openjsse)
     implementation(libs.mysql.connector.j)
     implementation(libs.mongodb.driver.kotlin.coroutine)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

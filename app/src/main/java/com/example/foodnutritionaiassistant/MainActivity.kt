@@ -229,10 +229,10 @@ fun MainScreen(
             ) { destination ->
                 when (destination) {
                     AppDestinations.HOME -> HomeScreen(isLoggedIn, onLoginClick)
-                    AppDestinations.GROUP -> CommunityScreen()
+                    AppDestinations.GROUP -> CommunityScreen(userViewModel = userViewModel)
                     AppDestinations.SCAN -> Box(Modifier.fillMaxSize()) // Placeholder
                     AppDestinations.ANALYSIS -> AnalysisScreen(userViewModel)
-                    AppDestinations.ME -> ProfileScreen(userViewModel, onLoginClick)
+                    AppDestinations.ME -> ProfileScreen(userViewModel, onLoginClick = onLoginClick)
                 }
             }
         }

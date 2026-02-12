@@ -1,0 +1,14 @@
+com\example\foodnutritionbackend\controller\UserController.class
+com\example\foodnutritionbackend\model\Comment.class
+com\example\foodnutritionbackend\service\PostService.class
+com\example\foodnutritionbackend\service\UserService.class
+com\example\foodnutritionbackend\controller\PostController.class
+com\example\foodnutritionbackend\service\CommentService.class
+com\example\foodnutritionbackend\repository\CommentRepository.class
+com\example\foodnutritionbackend\model\User.class
+com\example\foodnutritionbackend\controller\CommentController.class
+com\example\foodnutritionbackend\repository\PostRepository.class
+com\example\foodnutritionbackend\repository\UserRepository.class
+com\example\foodnutritionbackend\FoodNutritionBackendApplication.class
+com\example\foodnutritionbackend\model\Post.class
+com\example\foodnutritionbackend\dto\LoginRequest.class

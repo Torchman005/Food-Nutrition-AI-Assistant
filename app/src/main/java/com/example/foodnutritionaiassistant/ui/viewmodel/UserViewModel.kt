@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import org.bson.types.ObjectId
 
 enum class LoginType {
     WECHAT, PHONE
@@ -29,6 +30,7 @@ enum class GroupCategory(val displayName: String) {
 }
 
 data class UserProfile(
+    val id: String? = null, // MongoDB ObjectId as hex string
     var nickname: String = "",
     var gender: Int = 0, // 0: Unknown, 1: Male, 2: Female
     var birthDate: LocalDate = LocalDate.of(2000, 1, 1),
@@ -76,34 +78,32 @@ class UserViewModel : ViewModel() {
     }
 
     fun loginWithPhone(onSuccess: (Boolean) -> Unit) {
-        if (verificationCode == "123456") { 
-             viewModelScope.launch(Dispatchers.IO) {
-                val exists = userRepository.checkUserExists(LoginType.PHONE, phoneNumber)
-                
-                withContext(Dispatchers.Main) {
-                    if (exists) {
-                        // User exists, fetch data
-                        viewModelScope.launch(Dispatchers.IO) {
-                            val user = userRepository.getUser(LoginType.PHONE, phoneNumber)
-                            withContext(Dispatchers.Main) {
-                                if (user != null) {
-                                    userProfile = user
-                                    isLoggedIn = true
-                                    isFirstLogin = false
-                                    onSuccess(false)
-                                }
+        viewModelScope.launch(Dispatchers.IO) {
+            val exists = userRepository.checkUserExists(LoginType.PHONE, phoneNumber, verificationCode)
+            
+            withContext(Dispatchers.Main) {
+                if (exists) {
+                    // User exists, fetch data
+                    viewModelScope.launch(Dispatchers.IO) {
+                        val user = userRepository.getUser(LoginType.PHONE, phoneNumber, verificationCode)
+                        withContext(Dispatchers.Main) {
+                            if (user != null) {
+                                userProfile = user
+                                isLoggedIn = true
+                                isFirstLogin = false
+                                onSuccess(false)
                             }
                         }
-                    } else {
-                        // New User
-                        userProfile = userProfile.copy(
-                            loginType = LoginType.PHONE,
-                            phoneNumber = phoneNumber
-                        )
-                        isLoggedIn = true
-                        isFirstLogin = true
-                        onSuccess(true)
                     }
+                } else {
+                    // New User or Wrong Code (Assume New User for flow)
+                    userProfile = userProfile.copy(
+                        loginType = LoginType.PHONE,
+                        phoneNumber = phoneNumber
+                    )
+                    isLoggedIn = true
+                    isFirstLogin = true
+                    onSuccess(true)
                 }
             }
         }
